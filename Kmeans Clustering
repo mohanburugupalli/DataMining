@@ -1,0 +1,166 @@
+
+# author : Burugupalli Mohan
+
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib as mp
+import random
+import math
+import pandas as pd
+
+############# Copy input to data to an array ##################
+#arr=np.genfromtxt('iris.txt', delimiter=' ')
+arr=np.genfromtxt('t4.8k.txt', delimiter=' ')
+k=int(input("Enter desired number of clusters,k: "))
+
+
+########## Calculate Euclidean distances ############################
+def dist():
+    distarr1=[]
+    for l in range(k): 
+        distarr=[]
+        for m in range(len(arr)): 
+            b1=0
+            for n in range(len(arr[0])): 
+                a1 = pow((arr[m][n]-gen_arr1[l][n]),2)
+                b1 = b1+a1
+            c1=math.sqrt(b1)
+            distarr.append(c1)
+        distarr1.append(distarr)
+    return distarr1
+
+######### Compare distances for clustering #########################
+def compare_distances():
+    clust_arr=[]
+    df=pd.DataFrame.from_records(distarr1)
+    for i in range(len(distarr1[0])):
+        k=df[i].idxmin()
+        clust_arr.append(k)
+    return clust_arr
+
+################ Clustering ########################################
+def clustering():
+    clust_arr1=[]
+    ma=max(clust_arr)
+    for i in range ((ma+1)):
+        clust_arr1.append([])
+    
+    for j in range(len(arr)):
+        clu=clust_arr[j]
+        clust_arr1[clu].append(arr[j])
+
+    for i in range(len(clust_arr1)):
+        print (len(clust_arr1[i]))
+
+    return clust_arr1
+
+############## Calculating new centroids ############################
+def new_centroids():
+    new_meanarr=[]
+    for i in range(len(clust_arr1)):
+        new_mean = np.mean(clust_arr1[i],axis=0)
+        new_meanarr.append(new_mean)
+    return new_meanarr
+
+############ Update new centroids ###################################
+def update_centroids():
+    for i in range(len(new_centroid)):
+        for j in range(len(new_centroid[0])):
+            gen_arr1[i][j]=new_centroid[i][j]
+    return gen_arr1
+    
+
+####################################################################################################################
+#                                           Main Program                                                           #
+####################################################################################################################
+
+############ Plot the input data #############################
+x = [m[0] for m in arr]
+y = [m[1] for m in arr]
+#plt.scatter(x, y)
+#plt.show()
+
+############ Limits to generate random points ################
+lim_arr=[]
+for i in range(len(arr[0])):
+    a = max(m[i] for m in arr)
+    c = round(a)
+    lim_arr.append(c)
+
+########### Generate random cluster points ####################
+gen_arr1=[]
+for m in range(k):
+    gen_arr=[]
+    for i in range(len(lim_arr)):
+        x1=random.uniform(0,lim_arr[i])
+        gen_arr.append(x1)
+    gen_arr1.append(gen_arr)
+
+distarr1=dist()
+clust_arr=compare_distances()
+clust_arr1=clustering()
+new_centroid=new_centroids()
+
+
+############### Calculating convergence threshold value ###############
+mean1=np.mean(gen_arr1,axis=0)
+mean2=np.mean(new_centroid,axis=0)
+d=0
+for i in range(len(mean1)):
+    po=pow((mean1[i]-mean2[i]),2)
+    d=d+po
+update_centroids()
+
+############# Iterate until either threshold or no.of iterations condtions are met ##########
+
+iter=1
+while (d>0.001 and iter<=20):
+    distarr1=dist()
+    clust_arr=compare_distances()
+    clust_arr1=clustering()
+    new_centroid=new_centroids()
+    mean1=np.mean(gen_arr1,axis=0)
+    mean2=np.mean(new_centroid,axis=0)
+    d=0
+    for i in range(len(mean1)):
+        po=pow((mean1[i]-mean2[i]),2)
+        d=d+po
+    update_centroids()
+    iter=iter+1
+
+########### Categorize data points according to cluster number ###########
+
+clust_categorize=[]
+for i in range(len(clust_arr)):
+    bc = clust_arr[i]+1
+    clust_categorize.append(bc)
+
+############### Plot the data ###########################################
+
+for j in range(len(clust_arr1[0])):
+    plt.scatter(clust_arr1[0][j][0],clust_arr1[0][j][1],color='green')
+for i in range(len(clust_arr1[1])):
+    plt.scatter(clust_arr1[1][i][0],clust_arr1[1][i][1],color='yellow')
+#for i in range(len(clust_arr1[2])):
+#    plt.scatter(clust_arr1[2][i][0],clust_arr1[2][i][1],color='blue')
+#for i in range(len(clust_arr1[3])):
+#    plt.scatter(clust_arr1[3][i][0],clust_arr1[3][i][1],color='orange')
+for i in range(len(gen_arr1)):
+    plt.scatter(gen_arr1[i][0], gen_arr1[i][1],marker="D",color='red')
+plt.show()
+
+
+print("\n"+"Final mean/centroids of the desired "+str(k)+" clusters are as follows: ")
+for i in range(len(gen_arr1)):
+    print (gen_arr1[i])
+
+print("\n"+"Final size of the chosen "+str(k)+" clusters are:")
+for i in range(len(clust_arr1)):
+    print (len(clust_arr1[i]))
+
+#print ("\n"+"Final cluster assignment of all the data points: ")
+#print (clust_categorize)
+
+print("\n"+"No.of iterations are: "+str(iter-1))
+print("\n"+"Convergence value, \u0394: ",str(d))
+
