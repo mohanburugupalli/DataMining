@@ -1,0 +1,103 @@
+
+## Author: Burugupalli Mohan
+import numpy as np
+import math
+
+
+#################Probability Density Function###############################################
+def pdf(r,u,x):
+    y = 1/(math.sqrt(2*math.pi*r*r))
+    z = (math.pow((x-u), 2))/(2*r*r)
+    w = z*(-1)
+    v = math.exp(w)
+    p = y*v
+    return p
+
+
+##############################################################################################
+#                           MAIN PROGRAM                                                     #
+##############################################################################################
+
+data = int(input("Enter 1 for performance of 'irisTesting' dataset or\nEnter 2 for performance of 'irisPCTesting' dataset: " ))
+try:
+    if data == 1:
+        arr1 = np.genfromtxt('irisTesting.txt', delimiter=' ')
+        arr2 = np.genfromtxt('irisTraining.txt', delimiter=' ')
+    elif data == 2:
+        arr1 = np.genfromtxt('irisPCTesting.txt', delimiter=' ')
+        arr2 = np.genfromtxt('irisPCTraining.txt', delimiter=' ')
+
+################## arr2class1[] holds the data records with class lable=1 and arr2class2 holds records with class label=-1############
+    
+    arr2class1=[]
+    arr2class2=[]
+    q =(len(arr2[0])-1)
+    for i in range(len(arr2)):
+        if arr2[i][q] == 1.0:
+            arr2class1.append(arr2[i])
+        else:
+            arr2class2.append(arr2[i])
+
+################ Probability of class label=1 is pc1, and class label = -1 is pc2#############3333
+        
+    a= (len(arr2))
+    b= (len(arr2class1))
+    c= (len(arr2class2))
+    pc1 = b/a
+    pc2 = c/a
+
+################### Mean and Standard Deviation ##################################
+
+    arr2class1_mean = np.mean(arr2class1,axis=0)
+    arr2class2_mean = np.mean(arr2class2,axis=0)
+
+    arr2class1_std = np.std(arr2class1,axis=0)
+    arr2class2_std = np.std(arr2class2,axis=0)
+
+################### Predicting Class labels #######################################
+    class_arr=[]
+    for j in range(len(arr1)):
+        pr1=1
+        pr2=1
+        for i in range((len(arr1[0])-1)):
+            k = pdf(arr2class1_mean[i],arr2class1_std[i],arr1[j][i])
+            l = pdf(arr2class2_mean[i],arr2class2_std[i],arr2[j][i])
+            pr1 = pr1*k
+            pr2 = pr2*l
+        pr3 = pr1*pc1
+        pr4 = pr2*pc2
+        if (pr3 > pr4):
+            classlabel = 1
+        else:
+            classlabel = -1
+        class_arr.append(classlabel)
+
+################ Evaluating TP, FP, TN, FN values #################################
+    tp=0
+    fp=0
+    tn=0
+    fn=0
+    for i in range(len(class_arr)):
+        if ((class_arr[i] == 1) and (arr1[i][(len(arr1[0])-1)] == 1)):
+           tp = tp+1
+        elif ((class_arr[i] == 1) and (arr1[i][(len(arr1[0])-1)] == -1)):
+            fp =fp+1
+        elif ((class_arr[i] == -1) and (arr1[i][(len(arr1[0])-1)] == 1)):
+            fn =fn+1
+        elif ((class_arr[i] == -1) and (arr1[i][(len(arr1[0])-1)] == -1)):
+            tn = tn+1
+        else:
+            print ("Please check again")
+
+############## Calculating Accuracy, Precision, Recall and Specificity ###############
+    m=float(tp+fp+tn+fn)
+    ac = ((tp+tn)/m)*100
+    se = ((float(tp))/(tp+fn))*100
+    sp = ((float(tn))/(fp+tn))*100
+    pr = ((float(tp))/(tp+fp))*100
+    print("Number of True Positives(TPs) = "+str(tp)+"\n"+"Number of False Positives(FPs) = "+str(fp)+"\n"+"Number of True Negatives(TNs) = "+str(tn)+"\n"+"Number of False Negatives(FNs) = "+str(fn))
+    print("Accuracy : "+str(ac)+"%"+"\n"+"Recall : "+str(se)+"%"+"\n"+"Specificity : "+str(sp)+"%"+"\n"+"Precision : "+str(pr)+"%")
+    
+except:
+    print ("Please enter either 1 or 2 only:")
+    
