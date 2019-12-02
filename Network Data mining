@@ -1,0 +1,118 @@
+## Author: Burugupalli Mohan <mohan.burugupalli@ndsu.edu>
+
+import numpy as np
+import matplotlib.pyplot as plt
+import math
+
+#filename = "toyN.txt"
+#filename = "karate.txt"
+#filename = "HcNetwork.txt"
+filename = "HprdNetwork.txt"
+X = np.genfromtxt(filename, delimiter=' ')
+n = max(max(X[:,0]),max(X[:,1]))
+n1=int(n)
+A = np.zeros([int(n),int(n)],dtype = int)
+
+######## Adjacency Matrix creation ###############
+for i in range(len(X)):
+    k=X[i][0]
+    l=X[i][1]
+    p=int(k-1)
+    q=int(l-1)
+    A[p][q]=1
+    A[q][p]=1
+
+######### Degrees of each node ##################
+degree =[]
+for i in range(len(A)):
+    count = 0
+    for j in range(len(A[0])):
+        if (A[i][j]==1):
+            count=count+1
+    degree.append(count)
+    
+######## Removing duplicate degree values ###########
+unique=[]
+for i in degree:
+    if i not in unique:
+        unique.append(i)
+
+####### Calculate j, kj, P(j) values for Degree Distribution  ##########
+kj=[]
+pj=[]
+for i in unique:
+    c=0
+    for j in degree:
+        if (i==j):
+            c=c+1
+    prob=c/int(n)
+    kj.append(c)
+    pj.append(prob)
+
+##### Plot the Degree distribution ##############
+
+plt.scatter(unique,kj)
+plt.xlabel("degree, j")
+plt.ylabel("no. of nodes, kj")
+plt.show()
+plt.scatter(unique,pj)
+plt.xscale=("log")
+plt.yscale=("log")
+plt.show()
+unique1=[]
+pj1=[]
+for i in unique:
+    unique1.append(math.log(i))
+for i in pj:
+    pj1.append(math.log(i))
+plt.scatter(unique1,pj1)
+plt.xlabel("degree, j")
+plt.ylabel("probability of degree j, P(j)")
+plt.show()
+
+### Check neighbors of every node ###
+
+edges=[]
+for i in range(len(A)):
+    ne=[]
+    for j in range(len(A[0])):
+        if (A[i][j]==1):
+            j1=j+1
+            ne.append(j1)
+
+    ne1=[]
+    for m in ne:
+        m1=m-1
+        ne1.append(m1)
+
+    #### Calculate no.of edges of neighbouring graph #########
+
+    ed=0
+    for k in ne1:
+        for l in ne1:
+            if (A[k][l]==1):
+                ed=ed+1
+    ed1=ed/2
+    edges.append(int(ed1))
+
+#### Clustering coefficient of each node ########
+clust_coeff=[]
+for i in range(len(edges)):
+    if (degree[i]>1):
+        r1=edges[i]
+        r2=2*r1
+        s1=degree[i]
+        s2=(s1-1)
+        s3=s1*s2
+        clu1=r2/s3
+    else:
+        clu1=0
+    clust_coeff.append(clu1)
+
+##### Clustering coefficient of all nodes #######
+coeff=0
+for i in clust_coeff:
+    coeff=coeff+i
+coeff1=coeff/n
+
+print ("Cluster Coefficient of given data is: "+str(coeff1))
